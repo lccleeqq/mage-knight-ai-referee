@@ -1,0 +1,26 @@
+{
+  "suite":"Mage Knight Rules Engine v1 - Edge Cases",
+  "version":"1.1.0",
+  "cases":[
+    {"id":"EC-001","category":"Concentration","input":"Concentration 取得一個藍色 Mana。","expected":"not_violation"},
+    {"id":"EC-002","category":"Concentration","input":"我用 Concentration 搭配一張 Spell。","expected":"insufficient_information"},
+    {"id":"EC-003","category":"Concentration","input":"我用 Concentration 搭配一張 Unit。","expected":"insufficient_information"},
+    {"id":"EC-004","category":"Unit","state":{"unitState":"spent"},"input":"我再次使用這個 Unit。","expected":"violation"},
+    {"id":"EC-005","category":"Unit","state":{"unitState":"ready"},"input":"我使用這個 Unit。","expected":"insufficient_information"},
+    {"id":"EC-006","category":"Unit","state":{"unitState":"unknown"},"input":"我再次使用這個 Unit。","expected":"insufficient_information"},
+    {"id":"EC-007","category":"Block","state":{"phase":"Block"},"input":"我使用 Block 防禦敵人的攻擊。","expected":"not_violation"},
+    {"id":"EC-008","category":"Block","state":{"phase":"Attack"},"input":"我使用 Block 防禦敵人的攻擊。","expected":"violation"},
+    {"id":"EC-009","category":"Block","state":{"phase":"unknown"},"input":"我使用 Block 防禦敵人的攻擊。","expected":"insufficient_information"},
+    {"id":"EC-010","category":"Combat","input":"我攻擊敵人。","expected":"insufficient_information"},
+    {"id":"EC-011","category":"Combat","input":"我擊敗敵人後直接取得 Fame。","expected":"insufficient_information"},
+    {"id":"EC-012","category":"Mana","input":"我使用紅色 Mana 強化這張牌。","expected":"insufficient_information"},
+    {"id":"EC-013","category":"Movement","input":"我移動到森林。","expected":"insufficient_information"},
+    {"id":"EC-014","category":"Night","input":"我在 Night 直接做這個行動。","expected":"insufficient_information"},
+    {"id":"EC-015","category":"Safety","input":"這個行動一定合法。","expected":"insufficient_information"},
+    {"id":"EC-016","category":"Safety","input":"我想知道這個行動是否合法。","expected":"insufficient_information"},
+    {"id":"EC-017","category":"Language","input":"我用集中精神取得 Mana。","expected":"not_violation"},
+    {"id":"EC-018","category":"Mixed","state":{"unitState":"spent"},"input":"我這回合第二次使用已經 Spent 的 Unit。","expected":"violation"},
+    {"id":"EC-019","category":"Mixed","state":{"unitState":"unknown","phase":"unknown"},"input":"我用這張牌攻擊這個敵人。","expected":"insufficient_information"},
+    {"id":"EC-020","category":"Ambiguous","input":"我可以這樣做嗎？","expected":"insufficient_information"}
+  ]
+}
