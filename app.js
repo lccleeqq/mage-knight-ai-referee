@@ -1,61 +1,17 @@
-const rules = [
-  {
-    id: 'CONCENTRATION_MANA',
-    test: /(concentration|集中精神).*(產生|生成|增加|取得).*(魔力|mana)/i,
-    type: 'ok',
-    title: '✓ 合法：這個理解沒有錯',
-    body: 'Concentration 的基本效果可以取得 1 個 Mana token；其強效果則可讓你免費使用另一張 Action card 的強效果。\n\n因此「使用 Concentration 取得魔力」本身不是規則錯誤。若你同時要使用另一張牌，還需要檢查該牌的類型、效果與使用時機。'
-  },
-  {
-    id: 'CONCENTRATION_CARD_TYPE',
-    test: /(concentration|集中精神).*(法術|spell|單位|unit|神器|artifact)/i,
-    type: 'error',
-    title: '❌ 可能不合法：牌的類型不符',
-    body: 'Concentration 的強效果是針對另一張 Action card 的強效果；不能把任意 Spell、Unit 或 Artifact 當作 Action card。\n\n如果你提供具體牌名，正式裁判可以再檢查該牌的類型與卡牌原文。'
-  },
-  {
-    id: 'UNIT_TWICE',
-    test: /(部隊|單位).*(兩次|第二次|2次|再一次).*(同一回合|本回合|這回合)/i,
-    type: 'error',
-    title: '❌ 不合法：同一 Unit 不能重複啟動',
-    body: '一般規則下，每個 Unit 每 Round 只能被啟動一次；使用後會變成 Spent，直到下一 Round Ready。\n\n如果某個效果讓 Unit Ready，則可能存在例外，因此正式裁判需要同時檢查該效果。'
-  },
-  {
-    id: 'UNIT_DAMAGE',
-    test: /(已使用|用過).*(部隊|單位).*(格擋|承受|分配).*(傷害)/i,
-    type: 'warn',
-    title: '⚠️ 需要檢查：啟動與承受傷害是不同概念',
-    body: 'Unit 的「啟動能力」與「在傷害分配階段承受傷害」不是同一件事。已使用的 Unit 不代表它一定不能承受傷害。\n\n請提供敵人、傷害數值與 Unit 狀態才能裁判。'
-  },
-  {
-    id: 'DIRECT_FAME',
-    test: /(直接拿|直接取得|直接獲得).*(fame|聲望|名望)/i,
-    type: 'warn',
-    title: '⚠️ 需要檢查：可能跳過結算',
-    body: '如果 Fame 是因擊敗敵人取得，必須完成相應的戰鬥與獎勵結算。\n\n請提供敵人、攻擊方式及目前戰鬥階段，才能確認是否真的漏掉規則步驟。'
-  }
+// Mage Knight Rules Engine v1
+// Referee only: never recommend strategy. Results are ERROR / INSUFFICIENT / NO_KNOWN_ERROR.
+const RULE_SOURCE='https://www.mageknight.net/wp-content/uploads/Mage-Knight-Board-Game-Ultimate-Edition-Rule-Book-September-2018.pdf';
+const rules=[
+{id:'CONCENTRATION_MANA',match:/(?:concentration|集中精神).*(?:取得|產生|生成|增加).*(?:mana|魔力)/i,evaluate:()=>({type:'ok',title:'✓ 未發現違規',body:'Concentration 取得 Mana 本身不是規則錯誤。若你還要利用 Concentration 的複合效果去使用另一張牌，必須另外檢查被使用效果的類型、限制與時機。'})},
+{id:'CONCENTRATION_TARGET',match:/(?:concentration|集中精神).*(?:法術|spell|單位|unit|神器|artifact)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：需要具體牌名',body:'不能只因出現 Spell、Unit 或 Artifact 就直接判定違規。請提供具體牌名與你要使用的效果，裁判再檢查該效果的類型與限制。'})},
+{id:'UNIT_REPEAT',match:/(?:unit|部隊|單位).*(?:再|再次|第二次|兩次|2次|又).*(?:啟動|使用)/i,evaluate:({state})=>state.unitState==='spent'?{type:'error',title:'❌ 違規：Unit 已經是 Spent',body:'目前遊戲狀態顯示該 Unit 已經 Spent；不能再次使用其一般 Unit 能力，除非有明確效果使它重新 Ready。'}:{type:'insufficient',title:'⚠️ 資訊不足：需要 Unit 狀態',body:'請確認該 Unit 目前是 Ready 還是 Spent，以及是否有任何效果使它重新 Ready。'}},
+{id:'UNIT_DAMAGE',match:/(?:已使用|用過|spent).*(?:部隊|unit|單位).*(?:格擋|承受|分配).*(?:傷害)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：啟動與傷害分配是不同檢查',body:'不能因 Unit 已使用過，就直接推論它不能參與傷害處理。請提供敵人、傷害值、Unit 能力與目前戰鬥階段。'})},
+{id:'DIRECT_FAME',match:/(?:直接拿|直接取得|直接獲得).*(?:fame|聲望|名望)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：需要完整戰鬥狀態',body:'不能僅憑「直接拿 Fame」判定違規。請提供敵人、是否已擊敗敵人、戰鬥階段與 Fame 的來源。'})},
+{id:'BLOCK_PHASE',match:/(?:格擋|block).*(?:攻擊|傷害)/i,evaluate:({state})=>state.phase==='Attack'?{type:'error',title:'❌ 可能的階段錯誤',body:'目前狀態是 Attack 階段。若你正在處理敵人的攻擊，必須確認是否已經錯過 Block 階段。'}:state.phase==='Block'?{type:'ok',title:'✓ 階段符合',body:'目前為 Block 階段；下一步應檢查你使用的 Block 效果、敵人攻擊類型與數值。'}:{type:'insufficient',title:'⚠️ 資訊不足：需要戰鬥階段',body:'請將戰鬥階段設定為 Block，或提供完整戰鬥流程。'}}
 ];
-
-function check(text){
-  const value = text.trim();
-  if(!value) return {type:'warn',title:'⚠️ 請輸入行動',body:'請描述完整行動，例如：「我使用 Concentration 取得一個紅色 Mana token，然後使用另一張 Action card。」'};
-  for(const rule of rules){
-    if(rule.test.test(value)) return rule;
-  }
-  return {type:'ok',title:'✓ 未發現目前資料庫中的已知錯誤',body:'目前規則資料庫沒有找到與這段敘述衝突的規則。\n\n注意：這不是「一定合法」的保證。Phase 1 仍是原型，正式版需要完整卡牌、角色、Unit、敵人、Phase 與 FAQ 資料才能進行嚴格裁判。'};
-}
-
-const action=document.getElementById('action');
-const result=document.getElementById('result');
-function escapeHtml(s){
-  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-}
-function render(){
-  const r=check(action.value);
-  result.className=`result ${r.type}`;
-  result.innerHTML=`<div class="verdict">${escapeHtml(r.title)}</div><div>${escapeHtml(r.body).replaceAll('\n','<br>')}</div>`;
-}
-document.getElementById('checkBtn').addEventListener('click',render);
-document.getElementById('clearBtn').addEventListener('click',()=>{action.value='';result.className='result empty';result.textContent='等待你的行動……';action.focus();});
-document.querySelectorAll('[data-example]').forEach(btn=>btn.addEventListener('click',()=>{action.value=btn.dataset.example;render();}));
-action.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')render();});
+function stateFromUI(){return{round:Number(document.getElementById('round').value||1),time:document.getElementById('time').value,unitState:document.getElementById('unitState').value,phase:document.getElementById('phase').value}}
+function check(text,state){const value=text.trim();if(!value)return{type:'insufficient',title:'⚠️ 無法判定：沒有行動敘述',body:'請描述誰使用什麼、做什麼、在什麼階段、針對什麼目標。'};for(const rule of rules)if(rule.match.test(value))return rule.evaluate({text:value,state});return{type:'insufficient',title:'⚠️ 資訊不足：不是「合法」',body:'目前沒有規則足以證明這個行動違規，也沒有足夠資訊證明它合法。請補充卡牌/Unit 名稱、遊戲階段、目標、Mana、相關效果與目前狀態。'}}
+const action=document.getElementById('action'),result=document.getElementById('result');
+function escapeHtml(s){return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+function render(){const r=check(action.value,stateFromUI());result.className=`result ${r.type}`;result.innerHTML=`<div class="verdict">${escapeHtml(r.title)}</div><div>${escapeHtml(r.body).replaceAll('\n','<br>')}</div><div class="source"><a href="${RULE_SOURCE}" target="_blank" rel="noopener">規則來源：Mage Knight Ultimate Edition Rule Book</a></div>`}
+document.getElementById('checkBtn').addEventListener('click',render);document.getElementById('clearBtn').addEventListener('click',()=>{action.value='';result.className='result empty';result.textContent='等待判定……';action.focus()});document.querySelectorAll('[data-example]').forEach(btn=>btn.addEventListener('click',()=>{action.value=btn.dataset.example;render()}));action.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')render()});
