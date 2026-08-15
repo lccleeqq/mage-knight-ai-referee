@@ -1,10 +1,10 @@
-// Mage Knight Rules Engine v1
+// Mage Knight Rules Engine v1.1
 // Referee only: never recommend strategy. Results are ERROR / INSUFFICIENT / NO_KNOWN_ERROR.
 const RULE_SOURCE='https://www.mageknight.net/wp-content/uploads/Mage-Knight-Board-Game-Ultimate-Edition-Rule-Book-September-2018.pdf';
 const rules=[
 {id:'CONCENTRATION_MANA',match:/(?:concentration|集中精神)[\s\S]*(?:取得|產生|生成|增加)[\s\S]*(?:mana|魔力)/i,evaluate:()=>({type:'ok',title:'✓ 未發現違規',body:'Concentration 取得 Mana 本身不是規則錯誤。若你還要利用 Concentration 的複合效果去使用另一張牌，必須另外檢查被使用效果的類型、限制與時機。'})},
 {id:'CONCENTRATION_TARGET',match:/(?:concentration|集中精神)[\s\S]*(?:法術|spell|單位|unit|神器|artifact)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：需要具體牌名',body:'不能只因出現 Spell、Unit 或 Artifact 就直接判定違規。請提供具體牌名與你要使用的效果，裁判再檢查該效果的類型與限制。'})},
-{id:'UNIT_REPEAT',match:/(?:unit|部隊|單位)[\s\S]*(?:再|再次|第二次|兩次|2次|又)[\s\S]*(?:啟動|使用)|(?:unit|部隊|單位)[\s\S]*(?:啟動|使用)[\s\S]*(?:再|再次|第二次|兩次|2次|又)/i,evaluate:({state})=>state.unitState==='spent'?{type:'error',title:'❌ 違規：Unit 已經是 Spent',body:'目前遊戲狀態顯示該 Unit 已經 Spent；不能再次使用其一般 Unit 能力，除非有明確效果使它重新 Ready。'}:{type:'insufficient',title:'⚠️ 資訊不足：需要 Unit 狀態',body:'請確認該 Unit 目前是 Ready 還是 Spent，以及是否有任何效果使它重新 Ready。'}},
+{id:'UNIT_REPEAT',match:/(?:(?:unit|部隊|單位)[\s\S]*(?:再|再次|第二次|兩次|2次|又)[\s\S]*(?:啟動|使用))|(?:(?:再|再次|第二次|兩次|2次|又)[\s\S]*(?:啟動|使用)[\s\S]*(?:這個|該|這|the)?[\s\S]*(?:unit|部隊|單位))/i,evaluate:({state})=>state.unitState==='spent'?{type:'error',title:'❌ 違規：Unit 已經是 Spent',body:'目前遊戲狀態顯示該 Unit 已經 Spent；不能再次使用其一般 Unit 能力，除非有明確效果使它重新 Ready。'}:{type:'insufficient',title:'⚠️ 資訊不足：需要 Unit 狀態',body:'請確認該 Unit 目前是 Ready 還是 Spent，以及是否有任何效果使它重新 Ready。'}},
 {id:'UNIT_DAMAGE',match:/(?:已使用|用過|spent)[\s\S]*(?:部隊|unit|單位)[\s\S]*(?:格擋|承受|分配)[\s\S]*(?:傷害)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：啟動與傷害分配是不同檢查',body:'不能因 Unit 已使用過，就直接推論它不能參與傷害處理。請提供敵人、傷害值、Unit 能力與目前戰鬥階段。'})},
 {id:'DIRECT_FAME',match:/(?:直接拿|直接取得|直接獲得)[\s\S]*(?:fame|聲望|名望)/i,evaluate:()=>({type:'insufficient',title:'⚠️ 資訊不足：需要完整戰鬥狀態',body:'不能僅憑「直接拿 Fame」判定違規。請提供敵人、是否已擊敗敵人、戰鬥階段與 Fame 的來源。'})},
 {id:'BLOCK_PHASE',match:/(?:格擋|block)[\s\S]*(?:攻擊|傷害)/i,evaluate:({state})=>state.phase==='Attack'?{type:'error',title:'❌ 可能的階段錯誤',body:'目前狀態是 Attack 階段。若你正在處理敵人的攻擊，必須確認是否已經錯過 Block 階段。'}:state.phase==='Block'?{type:'ok',title:'✓ 階段符合',body:'目前為 Block 階段；下一步應檢查你使用的 Block 效果、敵人攻擊類型與數值。'}:{type:'insufficient',title:'⚠️ 資訊不足：需要戰鬥階段',body:'請將戰鬥階段設定為 Block，或提供完整戰鬥流程。'}}
