@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "2.0.0",
+  "game": "Mage Knight",
+  "principle": "Referee only; never recommend strategy.",
+  "verdicts": ["violation", "insufficient_information", "not_violation"],
+  "rules": [
+    {"id":"UNIT_SPENT_REPEAT","domain":"unit","priority":100,"when":{"unitState":"spent","action":"use_unit"},"verdict":"violation","reason":"A Spent Unit cannot normally be used again unless an effect makes it Ready."},
+    {"id":"UNIT_STATE_REQUIRED","domain":"unit","priority":90,"when":{"action":"use_unit","unitState":"unknown"},"verdict":"insufficient_information","reason":"Unit Ready/Spent state is required before judging repeated use."},
+    {"id":"BLOCK_PHASE","domain":"combat","priority":100,"when":{"action":"block","phase":"Attack"},"verdict":"violation","reason":"Block timing must be checked against the combat phase."},
+    {"id":"BLOCK_PHASE_VALID","domain":"combat","priority":90,"when":{"action":"block","phase":"Block"},"verdict":"not_violation","reason":"The action occurs during the Block phase; effect-specific validation is still required."},
+    {"id":"BLOCK_PHASE_REQUIRED","domain":"combat","priority":80,"when":{"action":"block","phase":"unknown"},"verdict":"insufficient_information","reason":"Combat phase is required to validate Block timing."},
+    {"id":"CONCENTRATION_MANA","domain":"card","priority":70,"when":{"action":"concentration_mana"},"verdict":"not_violation","reason":"Concentration generating/obtaining Mana is not by itself a rules violation."}
+  ]
+}
