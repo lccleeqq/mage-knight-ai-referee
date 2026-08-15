@@ -1,0 +1,13 @@
+{
+  "suite":"Action Normalizer v2",
+  "cases":[
+    {"id":"N-001","input":"我再次使用這個 Unit。","expected":{"action":"use_unit","signals":["repeat_use"]}},
+    {"id":"N-002","input":"我這回合第二次使用已經 Spent 的 Unit。","expected":{"action":"use_unit","unitState":"spent","signals":["repeat_use"]}},
+    {"id":"N-003","input":"我在 Block 階段用 Block 防禦敵人的攻擊。","expected":{"action":"block","phase":"Block"}},
+    {"id":"N-004","input":"我在 Night 移動到森林。","expected":{"action":"move","time":"Night","terrain":"forest"}},
+    {"id":"N-005","input":"我攻擊敵人。","expected":{"action":"attack","phase":"Attack"}},
+    {"id":"N-006","input":"這個行動可以嗎？","expected":{"action":"unknown","signals":["question"]}},
+    {"id":"N-007","input":"這個行動一定合法。","expected":{"action":"unknown","signals":["legality_claim"]}},
+    {"id":"N-008","input":"Concentration 取得 Mana。","expected":{"action":"concentration_mana"}}
+  ]
+}
