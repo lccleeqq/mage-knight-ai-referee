@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mage Knight AI Referee - Phase 1 rules checker">
+  <title>Mage Knight AI Referee</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="badge">PHASE 1 · RULES REFEREE</div>
+      <h1>⚔ Mage Knight AI 裁判</h1>
+      <p>只檢查規則，不替玩家做策略決策。</p>
+    </header>
+
+    <section class="panel">
+      <label for="action">描述你剛剛想做的行動</label>
+      <textarea id="action" placeholder="例如：我使用 Concentration 產生 2 點魔力。"></textarea>
+      <div class="controls">
+        <button id="checkBtn">⚖ 檢查規則</button>
+        <button id="clearBtn" class="secondary">清除</button>
+      </div>
+      <div class="examples">
+        <button data-example="我使用 Concentration 產生 2 點魔力。">範例 1</button>
+        <button data-example="我的同一個部隊這回合使用第二次。">範例 2</button>
+        <button data-example="我擊敗敵人後直接拿 Fame。">範例 3</button>
+        <button data-example="我想知道這個行動是否合法。">範例 4</button>
+      </div>
+    </section>
+
+    <section id="result" class="result empty">等待你的行動……</section>
+
+    <footer>
+      <small>Prototype v1.0 · 規則資料庫目前為示範版，正式版應以你指定的版本規則書與 FAQ 建立。</small>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
