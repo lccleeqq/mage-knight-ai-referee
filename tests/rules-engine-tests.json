@@ -1,0 +1,22 @@
+{
+  "suite": "Mage Knight Rules Engine v1",
+  "version": "1.0.0",
+  "principles": [
+    "Never recommend a strategy.",
+    "Never call an action legal solely because no rule matched.",
+    "Return insufficient_information when required state is missing.",
+    "Every violation must identify the rule and evidence used."
+  ],
+  "cases": [
+    {"id":"CE-001","category":"Concentration","input":"我使用 Concentration 取得 1 個紅色 Mana token。","expected":"not_violation","reason":"Concentration 取得 Mana 的描述不能被錯誤判定為違規。"},
+    {"id":"CE-002","category":"Concentration","input":"我用 Concentration 的強效果搭配 Spell。","expected":"insufficient_information","reason":"需要確認具體牌名與牌面效果，不能僅憑關鍵字判定。"},
+    {"id":"CE-003","category":"Unit","state":{"unitState":"spent"},"input":"我這回合再次啟動這個已經 Spent 的 Unit。","expected":"violation","reason":"已 Spent 的 Unit 不能在沒有 Ready 效果的情況下再次啟動。"},
+    {"id":"CE-004","category":"Unit","state":{"unitState":"unknown"},"input":"我再次啟動這個 Unit。","expected":"insufficient_information","reason":"沒有 Unit 的 Ready/Spent 狀態，不能武斷判定。"},
+    {"id":"CE-005","category":"Combat","input":"我擊敗敵人後直接拿 Fame。","expected":"insufficient_information","reason":"需要知道敵人、戰鬥方式與結算狀態。"},
+    {"id":"CE-006","category":"Unknown","input":"我移動到森林。","expected":"insufficient_information","reason":"至少需要時間、角色移動力與地圖位置/地形成本等狀態才能嚴格裁判。"},
+    {"id":"CE-007","category":"Unknown","input":"我攻擊敵人。","expected":"insufficient_information","reason":"需要敵人、攻擊來源、攻擊階段與相關卡牌/Unit 狀態。"},
+    {"id":"CE-008","category":"Mana","input":"我使用紅色 Mana 強化一張牌。","expected":"insufficient_information","reason":"需要具體牌名、牌面效果與當前可用 Mana 狀態。"},
+    {"id":"CE-009","category":"Turn","input":"我在 Night 階段做這個行動。","expected":"insufficient_information","reason":"僅知道 Night 不足以判定整個行動是否合法。"},
+    {"id":"CE-010","category":"Safety","input":"這個行動一定合法。","expected":"insufficient_information","reason":"裁判不得在缺少遊戲狀態與規則證據時宣稱一定合法。"}
+  ]
+}
